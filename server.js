@@ -24,12 +24,16 @@ const msgs = [
   }
 ];
 
-const in_channel_msg = (msg) => {
+const wrap = str => {
+  return { text: str };
+};
+
+const in_channel= msg => {
   return {
     response_type: "in_channel",
     text: msg
-  }
-}
+  };
+};
 
 // make all the files in 'public' available
 // https://expressjs.com/en/starter/static-files.html
@@ -42,14 +46,8 @@ app.get("/", (request, response) => {
 });
 
 app.post("/", (req, res) => {
-  res.json(in_channel_msg("POST request"));
-})
-
-// send the default array of dreams to the webpage
-// app.get("/dreams", (request, response) => {
-//   // express helps us take JS objects and send them as JSON
-//   response.json(dreams);
-// });
+  res.json(in_channel("POST request"));
+});
 
 // listen for requests :)
 const listener = app.listen(process.env.PORT, () => {
