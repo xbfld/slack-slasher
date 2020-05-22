@@ -28,7 +28,7 @@ const wrap = str => {
   return { text: str };
 };
 
-const in_channel= msg => {
+const in_channel = msg => {
   return {
     response_type: "in_channel",
     text: msg
@@ -37,7 +37,10 @@ const in_channel= msg => {
 
 // make all the files in 'public' available
 // https://expressjs.com/en/starter/static-files.html
-app.use(express.static("public"));
+// app.use(express.static("public"));
+
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
 // https://expressjs.com/en/starter/basic-routing.html
 app.get("/", (request, response) => {
@@ -46,7 +49,8 @@ app.get("/", (request, response) => {
 });
 
 app.post("/", (req, res) => {
-  res.json(in_channel("POST request"));
+  // res.json(in_channel("POST request: " + req.get("Content-Type")));
+  res.json(in_channel("POST request: " + JSON.stringify(req.body)));
 });
 
 // listen for requests :)
