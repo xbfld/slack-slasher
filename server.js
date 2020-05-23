@@ -71,7 +71,6 @@ app.get("/", (request, response) => {
 
 app.post("/", (req, res) => {
   // res.json(in_channel("POST request: " + req.get("Content-Type")));
-  // res.json(in_channel("POST request: " + JSON.stringify(req.body)));
   res.json(
     msg_unit("POST request")
       ._set("response_type", "in_channel")
