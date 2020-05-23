@@ -35,6 +35,27 @@ const in_channel = msg => {
   };
 };
 
+// raw text msg -> json payload
+var msg_unit = msg => {
+  var unit = {
+    text: msg,
+    _add: msg => {
+      unit.text += "" + msg;
+      return unit;
+    },
+    _set: (k, v) => {
+      unit[k] = v;
+      return unit;
+    },
+    _end: () => {
+      delete unit._set;
+      delete unit._end;
+      return JSON.stringify(unit);
+    }
+  };
+  return unit;
+};
+
 // make all the files in 'public' available
 // https://expressjs.com/en/starter/static-files.html
 // app.use(express.static("public"));
