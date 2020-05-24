@@ -69,25 +69,36 @@ app.get("/", (request, response) => {
   response.json(msgs[0]);
 });
 
-app.post("/", (req, res) => {
+// TODO: if req.body.text start with "debug " -> send beautified req.body
+app.post("/slack", (req, res) => {
   // res.json(in_channel("POST request: " + req.get("Content-Type")));
-  res.json(
-    msg_unit("POST request")
-      ._set("response_type", "in_channel")
-      ._add("\n" + "text: " + req.body.text)
-      ._add("\n" + "token: " + req.body.token)
-      ._add("\n" + "team_id: " + req.body.team_id)
-      ._add("\n" + "team_domain: " + req.body.team_domain)
-      ._add("\n" + "channel_id: " + req.body.channel_id)
-      ._add("\n" + "channel_name: " + req.body.channel_name)
-      ._add("\n" + "user_id: " + req.body.user_id)
-      ._add("\n" + "user_name: " + req.body.user_name)
-      ._add("\n" + "command: " + req.body.command)
-      ._add("\n" + "text: " + req.body.text)
-      ._add("\n" + "response_url: " + req.body.response_url)
-      ._end()
-  );
+  if (req.body.text.startsWith("debug")) {
+    res.json(
+      msg_unit("POST request")
+        ._set("response_type", "in_channel")
+        ._add("\n" + "token: " + req.body.token)
+        ._add("\n" + "team_id: " + req.body.team_id)
+        ._add("\n" + "team_domain: " + req.body.team_domain)
+        ._add("\n" + "channel_id: " + req.body.channel_id)
+        ._add("\n" + "channel_name: " + req.body.channel_name)
+        ._add("\n" + "user_id: " + req.body.user_id)
+        ._add("\n" + "user_name: " + req.body.user_name)
+        ._add("\n" + "command: " + req.body.command)
+        ._add("\n" + "text: " + req.body.text)
+        ._add("\n" + "response_url: " + req.body.response_url)
+        ._end()
+    );
+  } else {
+    res.json(
+      msg_unit("POST request")
+        ._set("response_type", "in_channel")
+        ._add("\n" + "not supported")
+        ._end()
+    );
+  }
 });
+
+// TODO: if req.body.text is "dice" -> send result of 1d6 roll
 
 // listen for requests :)
 const listener = app.listen(process.env.PORT, () => {
