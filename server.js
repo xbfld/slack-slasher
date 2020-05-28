@@ -125,6 +125,7 @@ app.post("/slack", (req, res) => {
 });
 
 // TODO: if req.body.text is "roll" -> send result of 1d6 roll
+const Dice = require("./dice.js")
 function diceQuery(str){
   return Math.floor(Math.random() * 6)+1
 }
