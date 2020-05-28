@@ -36,26 +36,41 @@ function diceAST(str) {
     brac,
     ket
   ) {
+    function node(type) {
+      t = {
+        type: type,
+        rolled: false,
+        result: [],
+        roll: () => {
+          return t;
+        },
+        eval: () => {
+          return t;
+        }
+      };
+      return t;
+    }
     if (diceL) {
-      var t ={
-        type: "diceLiteral",
-        left: parseInt(diceL0, 10),
-        right: parseInt(diceL1, 10)
-      }
-      tokens.push({...t,string: " " + t.left+"d"+t.right});
+      var t = node("diceLiteral");
+      t = { ...t, left: parseInt(diceL0, 10), right: parseInt(diceL1, 10) };
+      tokens.push({ ...t, string: " " + t.left + "d" + t.right });
     }
     if (number) {
-      var t = { type: "number", value: parseInt(number, 10) };
-      tokens.push({...t,string: " " + t.value});
+      var t = node("number");
+      t = { ...t, value: parseInt(number, 10) };
+      tokens.push({ ...t, string: " " + t.value });
     }
     if (op1) {
-      tokens.push({ type: "op1", string: op1 });
+      var t = node("op1");
+      tokens.push({ ...t, string: op1 });
     }
     if (op2) {
-      tokens.push({ type: "op2", string: op2 });
+      var t = node("op2");
+      tokens.push({ ...t, string: op2 });
     }
     if (func) {
-      tokens.push({ type: "func", string: func });
+      var t = node("func");
+      tokens.push({ ...t, string: func });
     }
     if (brac) {
       tokens.push({ type: "brac" });
@@ -66,7 +81,7 @@ function diceAST(str) {
     return "";
   });
   for (var i in tokens) {
-    // TODO: AST construct
+    
   }
   return tokens;
 }
