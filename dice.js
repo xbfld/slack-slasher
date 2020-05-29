@@ -28,16 +28,7 @@ function diceAST(str) {
   var re = /((\d+)d(\d+))|(\d+)|([*/%])|([+-])|(floor|round|ceil|abs)|([(])|([)])/g;
   function node(type) {
     var t = {
-      type: type,
-      rolled: false,
-      result: [],
-      roll: () => {
-        t.rolled = true;
-        return t;
-      },
-      eval: () => {
-        return t;
-      }
+      type: type
     };
     return t;
   }
@@ -68,15 +59,12 @@ function diceAST(str) {
           return acc + cur;
         }, 0);
       };
-      tokens.push({ ...t, string: " " + t.left + "d" + t.right });
+      tokens.push({ ...t, string: ""+t.left + "d" + t.right });
     }
     if (number) {
       var t = node("number");
       t = { ...t, value: parseInt(number, 10) };
-      t.eval = () => {
-        return t.value;
-      };
-      tokens.push({ ...t, string: " " + t.value });
+      tokens.push({ ...t});
     }
     if (op1) {
       var t = node("op1");
@@ -232,9 +220,14 @@ function diceASTcompile(tree, tokens) {
         };
         break;
       case "diceLiteral":
+        let token = tokens[tree[i].pos]
+        let {left:left,right:right} = token
         t.roll = () => {
           t.body.map(v => v.roll());
-          t.diceResult = [1, 2, 3]; //TODO: randomize
+          t.diceResult = [];
+          for(;left>0;left--){
+            t.diceResult.push(Math.floor(Math.random()*right+1))
+          }
           t.rolled = true;
         };
         break;
@@ -352,20 +345,21 @@ function diceASTcompile(tree, tokens) {
       case "number":
         const v = tokens[tree[i].pos].value;
         t.stringify = () => {
-          let bodyStr = t.body.map(v => v.stringify());
+          // let bodyStr = t.body.map(v => v.stringify());
           t.string = "" + v;
           return t.string;
         };
         break;
       case "diceLiteral":
+        const d = tokens[tree[i].pos].string;
         t.stringify = () => {
-          let bodyStr = t.body.map(v => v.stringify());
+          // let bodyStr = t.body.map(v => v.stringify());
           if (t.rolled) {
-            t.result = "(" + t.diceResult.join("+") + ")";
+            t.string = "(" + t.diceResult.join("+") + ")";
           } else {
-            t.result = bodyStr.join("d");
+            t.string = d;
           }
-          return t.result;
+          return t.string;
         };
         break;
       default:
@@ -400,12 +394,14 @@ function diceASTtest(cases) {
 }
 
 let cases = [
-  { input: "3", expect: [["3"], [3], ["3"]] },
+  { input: "3d3", expect: [["3d3"], [3,4,5,6,7,8,9], [/^\([123]\+[123]\+[123]\)$/]] },
+  { input: "  floor (3d3 %  3 / 2)   ", expect: [[/floor\(3d3%3\/2\)/], [0,0.5,1], [/^floor\(\([123]\+[123]\+[123]\)\%3\/2\)$/]] },
   { input: "1-2+3", expect: [[/1-2\+3/], [2], [/1-2\+3/]] },
   { input: "1-2+3*5/4%3", expect: [[/1-2\+3\*5\/4\%3/], [-0.25], [/1-2\+3\*5\/4\%3/]] },
 ];
 
-// console.log(diceASTtest(cases));
+console.log(diceASTtest(cases));
+console.log(cases.map(x=>x.pass));
 
 exports.diceAST = diceAST;
 exports.diceASTcompile = diceASTcompile;
