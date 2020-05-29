@@ -25,7 +25,7 @@
 // return: {tree:(AST of str), tokens:(tokenized str)}
 function diceAST(str) {
   var tokens = [];
-  var re = /((\d)+d(\d)+)|(\d)+|([*/%])|([+-])|(floor|round|ceil|abs)|([(])|([)])/g;
+  var re = /((\d+)d(\d+))|(\d+)|([*/%])|([+-])|(floor|round|ceil|abs)|([(])|([)])/g;
   function node(type) {
     var t = {
       type: type,
