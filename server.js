@@ -106,12 +106,11 @@ app.post("/slack", (req, res) => {
         // ._add("\n" + "response_url: " + req.body.response_url)
         ._end()
     );
-  } else if(req.body.text.startsWith("roll")){
-    
+  } else if (req.body.text.startsWith("roll")) {
     res.json(
       msg_unit("POST request")
         ._set("response_type", "in_channel")
-        ._add("\n" + "roll: "+ diceQuery("TODO"))
+        ._add("\n" + "roll: " + diceQuery("TODO"))
         ._end()
     );
   } else {
@@ -125,9 +124,10 @@ app.post("/slack", (req, res) => {
 });
 
 // TODO: if req.body.text is "roll" -> send result of 1d6 roll
-const Dice = require("./dice.js")
-function diceQuery(str){
-  return Math.floor(Math.random() * 6)+1
+const Dice = require("./dice.js");
+console.log(Dice);
+function diceQuery(str) {
+  return Math.floor(Math.random() * 6) + 1;
 }
 
 // listen for requests :)
