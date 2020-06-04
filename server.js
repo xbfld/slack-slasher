@@ -107,10 +107,15 @@ app.post("/slack", (req, res) => {
         ._end()
     );
   } else if (req.body.text.startsWith("roll")) {
+    let re = /roll +(.*)/;
+    let result;
+    req.body.text.replace(re, function(match, query) {
+      result = diceQuery(query);
+    });
     res.json(
       msg_unit("POST request")
         ._set("response_type", "in_channel")
-        ._add("\n" + "roll: " + diceQuery("TODO"))
+        ._add("\n" + "roll: " + result)
         ._end()
     );
   } else {
@@ -127,7 +132,16 @@ app.post("/slack", (req, res) => {
 const Dice = require("./dice.js");
 console.log(Dice);
 function diceQuery(str) {
-  return Math.floor(Math.random() * 6) + 1;
+  let ast = Dice.diceAST(str);
+  let com = Dice.diceASTcompile(ast.tree, ast.tokens);
+
+  let [x, , y, z] = [
+    com[0].stringify(),
+    com[0].roll(),
+    com[0].eval(),
+    com[0].stringify()
+  ];
+  return [x, y, z].join("\n");
 }
 
 // listen for requests :)
