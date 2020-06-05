@@ -115,7 +115,7 @@ app.post("/slack", (req, res) => {
     res.json(
       msg_unit("POST request")
         ._set("response_type", "in_channel")
-        ._add("\n" + "roll: " + result)
+        ._add("\n" + result)
         ._end()
     );
   } else {
@@ -131,7 +131,14 @@ app.post("/slack", (req, res) => {
 const Dice = require("./dice.js");
 // console.log(Dice);
 function diceQuery(str) {
-  return Dice.diceRoll(str).join("\n");
+  try {
+    let [roll, result, detail] = Dice.diceRoll(str);
+    return ["roll: " + roll, "detail: " + detail, "result: " + result].join(
+      "\n"
+    );
+  } catch {
+    return "roll: error!";
+  }
 }
 
 // listen for requests :)
