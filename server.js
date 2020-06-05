@@ -128,20 +128,10 @@ app.post("/slack", (req, res) => {
   }
 });
 
-// TODO: if req.body.text is "roll" -> send result of 1d6 roll
 const Dice = require("./dice.js");
-console.log(Dice);
+// console.log(Dice);
 function diceQuery(str) {
-  let ast = Dice.diceAST(str);
-  let com = Dice.diceASTcompile(ast.tree, ast.tokens);
-
-  let [x, , y, z] = [
-    com[0].stringify(),
-    com[0].roll(),
-    com[0].eval(),
-    com[0].stringify()
-  ];
-  return [x, y, z].join("\n");
+  return Dice.diceRoll(str).join("\n");
 }
 
 // listen for requests :)

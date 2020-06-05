@@ -136,7 +136,7 @@ function diceAST(str) {
           move({ pos: cur, body: [left, right], hint: list[cur].type });
           cur = rest;
           continue;
-        case "op2": //+, -
+        case "op2":
           var left = stack.pop();
           var [body, rest] = ast(list, cur + 1, end);
           var right = body[0];
@@ -351,9 +351,8 @@ function diceASTcompile(tree, tokens) {
   return list;
 }
 
-function diceASTtest(cases) {
-  for (let c of cases) {
-    let ast = diceAST(c.input);
+function diceRoll(str){
+    let ast = diceAST(str);
     let com = diceASTcompile(ast.tree, ast.tokens);
     let [x, , y, z] = [
       com[0].stringify(),
@@ -361,7 +360,12 @@ function diceASTtest(cases) {
       com[0].eval(),
       com[0].stringify()
     ];
-    c.output = [x, y, z];
+  return [x,y,z]  
+}
+
+function diceASTtest(cases) {
+  for (let c of cases) {
+    c.output = diceRoll(c.input);
 
     c.tests = [
       !c.expect[0].every(x => c.output[0].search(x) < 0),
@@ -383,7 +387,6 @@ let cases = [
 console.log(diceASTtest(cases));
 console.log(cases.map(x=>x.pass));
 
-exports.diceAST = diceAST;
-exports.diceASTcompile = diceASTcompile;
+exports.diceRoll = diceRoll;
 
 console.log("./dice.js");
