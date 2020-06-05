@@ -136,7 +136,7 @@ function diceAST(str) {
           move({ pos: cur, body: [left, right], hint: list[cur].type });
           cur = rest;
           continue;
-        case "op2":// +, -
+        case "op2": //+, -
           var left = stack.pop();
           var [body, rest] = ast(list, cur + 1, end);
           var right = body[0];
