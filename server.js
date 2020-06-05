@@ -131,8 +131,14 @@ app.post("/slack", (req, res) => {
 const Dice = require("./dice.js");
 // console.log(Dice);
 function diceQuery(str) {
-  let [roll, result, detail] = Dice.diceRoll(str);
-  return ["roll: " + roll, "detail: " + detail, "result: " + result].join("\n");
+  try {
+    let [roll, result, detail] = Dice.diceRoll(str);
+    return ["roll: " + roll, "detail: " + detail, "result: " + result].join(
+      "\n"
+    );
+  } catch {
+    return "roll: error!";
+  }
 }
 
 // listen for requests :)
