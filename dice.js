@@ -47,12 +47,12 @@ function diceAST(str) {
     if (diceL) {
       var t = node("diceLiteral");
       t = { ...t, left: parseInt(diceL0, 10), right: parseInt(diceL1, 10) };
-      tokens.push({ ...t, string: ""+t.left + "d" + t.right });
+      tokens.push({ ...t, string: "" + t.left + "d" + t.right });
     }
     if (number) {
       var t = node("number");
       t = { ...t, value: parseInt(number, 10) };
-      tokens.push({ ...t});
+      tokens.push({ ...t });
     }
     if (op1) {
       var t = node("op1");
@@ -137,7 +137,9 @@ function diceAST(str) {
           cur = rest;
           continue;
         case "op2": //+, -
-          var left = stack.pop();
+          var left = stack.length
+            ? stack.pop()
+            : { pos: -1, body: [], hint: "sign" };
           var [body, rest] = ast(list, cur + 1, end);
           var right = body[0];
           var move = (...args) => {
@@ -187,6 +189,7 @@ function diceASTcompile(tree, tokens) {
   };
   for (const i in tree) {
     const t = compiledNode();
+    // console.log(tree[i])
     t.body = diceASTcompile(tree[i].body, tokens);
 
     //t.roll
@@ -196,19 +199,20 @@ function diceASTcompile(tree, tokens) {
       case "op1":
       case "op2":
       case "number":
+      case "sign":
         t.roll = () => {
           t.body.map(v => v.roll());
           t.rolled = true;
         };
         break;
       case "diceLiteral":
-        let token = tokens[tree[i].pos]
-        let {left:left,right:right} = token
+        let token = tokens[tree[i].pos];
+        let { left: left, right: right } = token;
         t.roll = () => {
           t.body.map(v => v.roll());
           t.diceResult = [];
-          for(;left>0;left--){
-            t.diceResult.push(Math.floor(Math.random()*right+1))
+          for (; left > 0; left--) {
+            t.diceResult.push(Math.floor(Math.random() * right + 1));
           }
           t.rolled = true;
         };
@@ -287,6 +291,12 @@ function diceASTcompile(tree, tokens) {
           return t.result;
         };
         break;
+      case "sign":
+        t.eval = () => {
+          t.result = 0;
+          return t.result;
+        };
+        break;
       case "diceLiteral":
         t.eval = () => {
           if (t.rolled) {
@@ -331,6 +341,12 @@ function diceASTcompile(tree, tokens) {
           return t.string;
         };
         break;
+      case "sign":
+        t.stringify = () => {
+          t.string = "";
+          return t.string;
+        };
+        break;
       case "diceLiteral":
         const d = tokens[tree[i].pos].string;
         t.stringify = () => {
@@ -351,16 +367,16 @@ function diceASTcompile(tree, tokens) {
   return list;
 }
 
-function diceRoll(str){
-    let ast = diceAST(str);
-    let com = diceASTcompile(ast.tree, ast.tokens);
-    let [x, , y, z] = [
-      com[0].stringify(),
-      com[0].roll(),
-      com[0].eval(),
-      com[0].stringify()
-    ];
-  return [x,y,z]  
+function diceRoll(str) {
+  let ast = diceAST(str);
+  let com = diceASTcompile(ast.tree, ast.tokens);
+  let [x, , y, z] = [
+    com[0].stringify(),
+    com[0].roll(),
+    com[0].eval(),
+    com[0].stringify()
+  ];
+  return [x, y, z];
 }
 
 function diceASTtest(cases) {
@@ -373,19 +389,45 @@ function diceASTtest(cases) {
       !c.expect[2].every(x => c.output[2].search(x) < 0)
     ];
     c.pass = c.tests.every(x => x);
+    if (!c.pass) {
+      console.log(c);
+    }
   }
   return cases;
 }
 
 let cases = [
-  { input: "3d3", expect: [["3d3"], [3,4,5,6,7,8,9], [/^\([123]\+[123]\+[123]\)$/]] },
-  { input: "  floor ( 3  d  3 %  3 / 2)   ", expect: [[/floor\(3d3%3\/2\)/], [0,0.5,1], [/^floor\(\([123]\+[123]\+[123]\)\%3\/2\)$/]] },
+  {
+    input: "3d3",
+    expect: [["3d3"], [3, 4, 5, 6, 7, 8, 9], [/^\([123]\+[123]\+[123]\)$/]]
+  },
+  {
+    input: "  floor ( 3  d  3 %  3 / 2)   ",
+    expect: [
+      [/floor\(3d3%3\/2\)/],
+      [0, 0.5, 1],
+      [/^floor\(\([123]\+[123]\+[123]\)\%3\/2\)$/]
+    ]
+  },
   { input: "1-   2 +3", expect: [[/1-2\+3/], [2], [/1-2\+3/]] },
-  { input: "1-2 +3  *  5/ 4%  3", expect: [[/1-2\+3\*5\/4\%3/], [-0.25], [/1-2\+3\*5\/4\%3/]] },
+  {
+    input: "1-2 +3  *  5/ 4%  3",
+    expect: [[/1-2\+3\*5\/4\%3/], [-0.25], [/1-2\+3\*5\/4\%3/]]
+  },
+  { input: "-1", expect: [["-1"], [-1], ["-1"]] },
+  { input: "3+(-1)", expect: [[/3\+\(-1\)/], [2], [/3\+\(-1\)/]] },
+  {
+    input: "-3d3",
+    expect: [
+      ["-3d3"],
+      [-3, -4, -5, -6, -7, -8, -9],
+      [/^-\([123]\+[123]\+[123]\)$/]
+    ]
+  }
 ];
 
 console.log(diceASTtest(cases));
-console.log(cases.map(x=>x.pass));
+console.log(cases.map(x => x.pass));
 
 exports.diceRoll = diceRoll;
 
