@@ -24,6 +24,69 @@ const msgs = [
   }
 ];
 
+const test_payload = {
+  blocks: [
+    {
+      type: "section",
+      text: {
+        type: "mrkdwn",
+        text:
+          "You have a new request:\n*<fakeLink.toEmployeeProfile.com|Fred Enriquez - New device request>*"
+      }
+    },
+    {
+      type: "section",
+      fields: [
+        {
+          type: "mrkdwn",
+          text: "*Type:*\nComputer (laptop)"
+        },
+        {
+          type: "mrkdwn",
+          text: "*When:*\nSubmitted Aut 10"
+        },
+        {
+          type: "mrkdwn",
+          text: "*Last Update:*\nMar 10, 2015 (3 years, 5 months)"
+        },
+        {
+          type: "mrkdwn",
+          text: "*Reason:*\nAll vowel keys aren't working."
+        },
+        {
+          type: "mrkdwn",
+          text: '*Specs:*\n"Cheetah Pro 15" - Fast, really fast"'
+        }
+      ]
+    },
+    {
+      type: "actions",
+      elements: [
+        {
+          type: "button",
+          text: {
+            type: "plain_text",
+            emoji: true,
+            text: "Approve"
+          },
+          style: "primary",
+          value: "click_me_123"
+        },
+        {
+          type: "button",
+          text: {
+            type: "plain_text",
+            emoji: true,
+            text: "Deny"
+          },
+          style: "danger",
+          value: "click_me_123"
+        }
+      ]
+    }
+  ]
+};
+
 const wrap = str => {
   return { text: str };
 };
@@ -38,7 +101,7 @@ const in_channel = msg => {
 // raw text msg -> json payload
 // keep all function returns "unit"
 // ㄴthis will make "unit" uncanged its form during function call
-var msg_unit = msg => {
+function msg_unit(msg = "") {
   var unit = {
     text: msg,
     _add: more => {
@@ -62,7 +125,7 @@ var msg_unit = msg => {
     }
   };
   return unit;
-};
+}
 
 // suger: map
 const map = (obj, f) => {
@@ -84,6 +147,9 @@ app.get("/", (request, response) => {
 
 // DONE: if req.body.text start with "debug " -> send beautified req.body
 app.post("/slack", (req, res) => {
+  if (req.body.token !== process.env.SLACK_TOKEN) {
+    return;
+  }
   // res.json(in_channel("POST request: " + req.get("Content-Type")));
   if (req.body.text.startsWith("debug")) {
     res.json(
@@ -117,6 +183,15 @@ app.post("/slack", (req, res) => {
         ._set("response_type", "in_channel")
         ._add("\n" + result)
         ._end()
+    );
+  } else if (req.body.text.startsWith("test")) {
+    res.json(
+      Object.assign(
+        msg_unit()
+          ._set("response_type", "in_channel")
+          ._end(),
+        test_payload
+      )
     );
   } else {
     res.json(
