@@ -19,4 +19,5 @@
 - 2.1. [Glitch]에서 제공하는 export 툴을 이용해 [Github] 저장소의 'glitch' branch에 commit할 수 있다.
 - 2.2. [Github]에서 PR 만들고 master에 merge 한다.
 
+[glitch]: https://glitch.com/ "Glitch main site"
 [github]: https://github.com/xbfld/slack-slasher "Github repo for this project"
